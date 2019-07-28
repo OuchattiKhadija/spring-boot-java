@@ -15,16 +15,25 @@ public class Todo {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private long id;
+	public int getActive() {
+		return active;
+	}
+
+	public void setActive(int active) {
+		this.active = active;
+	}
 	private String content;
 	private Date date;
+	private int active;
 	
 	public Todo() {}
 	
-	public Todo(long id, String content, Date date) {
+	public Todo(long id, String content, Date date, int active) {
 		super();
 		this.id = id;
 		this.content = content;
 		this.date = date;
+		this.active = active;
 	}
 	
 	public long getId() {
