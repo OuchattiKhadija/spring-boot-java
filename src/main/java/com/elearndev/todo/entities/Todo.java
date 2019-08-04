@@ -28,6 +28,14 @@ public class Todo {
 	
 	public Todo() {}
 	
+	public Todo(String content, Date date, int active) {
+		super();
+	
+		this.content = content;
+		this.date = date;
+		this.active = active;
+	}
+	
 	public Todo(long id, String content, Date date, int active) {
 		super();
 		this.id = id;
