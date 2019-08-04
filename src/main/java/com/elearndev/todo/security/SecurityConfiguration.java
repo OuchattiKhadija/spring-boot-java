@@ -15,6 +15,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.elearndev.todo.repositories.UserRepository;
 
+import rc.bootsecurity.security.JwtAuthorizationFilter;
+
 
 @Configuration
 @EnableWebSecurity
@@ -41,10 +43,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 // add jwt filters (1. authentication, 2. authorization)
                 .addFilter(new JwtAuthenticationFilter(authenticationManager()))
+                .addFilter(new JwtAuthorizationFilter(authenticationManager(),  this.userRepository))
                 .authorizeRequests()
                 // configure access rules
                 .antMatchers(HttpMethod.POST, "/login").permitAll()
-                .antMatchers("/todos").hasAnyRole("ADMIN", "MANAGER")
+                .antMatchers("/todos").hasAnyRole("MANAGER", "ADMIN")
                 .antMatchers("/todos/**").hasRole("ADMIN")
                 .anyRequest().authenticated();
     }
