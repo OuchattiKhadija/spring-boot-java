@@ -3,6 +3,10 @@ package com.elearndev.todo.security;
 import com.auth0.jwt.JWT;
 import com.elearndev.todo.entities.LoginViewModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.namedparam.ParsedSql;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,6 +21,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 
@@ -61,11 +67,19 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         // Create JWT Token
         String token = JWT.create()
                 .withSubject(principal.getUsername())
+                .withClaim("sub", principal.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.EXPIRATION_TIME))
                 .sign(HMAC512(JwtProperties.SECRET.getBytes()));
+        
+        Map<String, Object> tokenMap = new HashMap<String, Object>();
+        tokenMap.put("token", token);
+        tokenMap.put("experation_time", new Date(System.currentTimeMillis() + JwtProperties.EXPIRATION_TIME));
 
-        // Add token in response
-        response.addHeader(JwtProperties.HEADER_STRING, JwtProperties.TOKEN_PREFIX +  token);
-        response.getWriter().write(JwtProperties.TOKEN_PREFIX +  token);
+        response.setStatus(HttpStatus.OK.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.writeValue(response.getWriter(), tokenMap);
+
+       
     }
 }

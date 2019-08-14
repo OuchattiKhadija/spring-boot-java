@@ -1,5 +1,8 @@
 package com.elearndev.todo.security;
 
+import java.util.Arrays;
+
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,11 +14,12 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.elearndev.todo.repositories.UserRepository;
 
-import rc.bootsecurity.security.JwtAuthorizationFilter;
 
 
 @Configuration
@@ -38,6 +42,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 // remove csrf and state in session because in jwt we do not need them
+                .cors()
+                .and()
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
@@ -46,12 +52,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .addFilter(new JwtAuthorizationFilter(authenticationManager(),  this.userRepository))
                 .authorizeRequests()
                 // configure access rules
-                .antMatchers(HttpMethod.POST, "/login").permitAll()
-                .antMatchers("/todos").hasAnyRole("MANAGER", "ADMIN")
+                .antMatchers("/login").permitAll()
                 .antMatchers("/todos/**").hasRole("ADMIN")
                 .anyRequest().authenticated();
     }
-
+    
+ 
+    
+    
     @Bean
     DaoAuthenticationProvider authenticationProvider(){
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
@@ -64,5 +72,13 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+    
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", new CorsConfiguration().applyPermitDefaultValues());
+
+        return source;
     }
 }
